@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SpaceWar:jar">
+    <output-path>$USER_HOME$/Desktop/untitled folder</output-path>
+    <root id="archive" name="SpaceWar.jar">
+      <element id="module-output" name="SpaceWar" />
+    </root>
+  </artifact>
+</component>
