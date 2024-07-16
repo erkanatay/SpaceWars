@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-
 class Fire {
     public boolean isabetEtti=false;
     private int x;
@@ -54,6 +53,8 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
     private ArrayList<Fire> shoot = new ArrayList<Fire>();
     private int fire_Oy = 1;
+
+    private boolean oyunCalisiyor = false;
     private int enemy_OX = 405;
     private int enemy_move_OX = 2;
 
@@ -61,26 +62,33 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
     private int uzayGemisi_move_OX = 20;
     private long enemyVuruldu = 0;
+    private JDialog dialog;
 
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        // g.setColor(Color.RED);
-        //g.fillOval(enemy_OX , 0 , 20 , 20);
+
+        g.drawImage(space, 0, 0, space.getWidth(), space.getHeight(), this);
+
+        if (!this.oyunCalisiyor) {
+            oyunStatusunuKontrolEt();
+            return;
+        }
+
+
 
         sure += 5;
 
-        g.drawImage(space, 0, 0, space.getWidth(), space.getHeight(), this);
         g.drawImage(ucak, uzayGemisi_OX, 590, ucak.getWidth() / 5, ucak.getHeight() / 5, this);
 
         g.drawImage(enemy, enemy_OX, 0, enemy.getWidth() / 6, enemy.getHeight() / 5, this);
 
         for (int i = 0; i < this.can; i++) {
-            g.drawImage(heart, i*40,0 , 40, 40, this);
+            g.drawImage(heart, i*40,0 , 30, 30, this);
         }
 
-        if (System.currentTimeMillis() - this.enemyVuruldu < 500) {
+        if (System.currentTimeMillis() - this.enemyVuruldu < 900) {
             g.drawImage(enemyYaniyor, enemy_OX, 0, enemy.getWidth() / 6, enemy.getHeight() / 5, this);
         }
 
@@ -94,18 +102,65 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             g.fillOval(fire.getX(), fire.getY(), 4, 20);
         }
 
-        g.setColor(Color.WHITE);
-        g.drawString(String.valueOf(mermi-kullanilanAtes),200,50);
+        g.setColor(Color.green);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        g.drawString(String.valueOf(mermi-kullanilanAtes),10,75);
+
 
         if (checkGame()){
-            timer.stop();
+            oyunCalisiyor=false;
             String message = "DUSMAN YOK EDILDI !!!\n"+
                     "Harcana Ates : " + kullanilanAtes +
-                    "\nSure : " + sure / 1000;
-            JOptionPane.showMessageDialog(this, message);
-
-            System.exit(0);
+                    "\nSüre : " + sure / 1000;
+          //  JOptionPane.showMessageDialog(this, message);
         }
+    }
+
+    private void oyunStatusunuKontrolEt() {
+        if (this.oyunCalisiyor) {
+            return;
+        }
+        if (dialog!=null && dialog.isVisible()) {
+            return;
+        }
+        JPanel panel = new JPanel();
+
+        panel.setLayout(new FlowLayout());
+
+        JButton startButton = new JButton("Start Game");
+
+        can = 3;
+
+        startButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                oyunCalisiyor = true;
+                timer.start();
+                dialog.setVisible(false);
+            }
+        });
+        startButton.setBounds(10,10,100,100);
+        panel.add(startButton);
+
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        panel.setBackground(Color.GRAY);
+
+
+
+        panel.add(exitButton);
+
+        dialog = new JDialog();
+        dialog.setLocation(250,200);
+        dialog.setModal(true);
+        dialog.setSize(400,150);
+        dialog.add(panel);
+        dialog.setVisible(true);
     }
 
     @Override
@@ -122,7 +177,7 @@ public class Game extends JPanel implements KeyListener, ActionListener {
 
     public boolean checkGame (){
         for (Fire fire : shoot){
-            if (new Rectangle(fire.getX(), fire.getY(),4, 20 ).intersects(new Rectangle(enemy_OX + 40, 0 ,40,2))){
+            if (new Rectangle(fire.getX(), fire.getY(),30, 40 ).intersects(new Rectangle(enemy_OX + 40, 0 ,30,20))){
                 if (fire.isabetEtti) {
                     continue;
                 }
@@ -148,16 +203,14 @@ public class Game extends JPanel implements KeyListener, ActionListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        //setBackground(Color.BLACK);
+
         timer.start();
 
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
-
     @Override
     public void keyPressed(KeyEvent e) {
         int c = e.getKeyCode();
@@ -184,19 +237,15 @@ public class Game extends JPanel implements KeyListener, ActionListener {
             kullanilanAtes ++;
         }
     }
-
     @Override
     public void keyReleased(KeyEvent e) {
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         for (Fire fire : shoot){
             fire.setY(fire.getY() - fire_Oy);
         }
-
         enemy_OX += enemy_move_OX;
         if (enemy_OX >= 810) {
             enemy_move_OX = -enemy_move_OX;

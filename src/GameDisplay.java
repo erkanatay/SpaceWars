@@ -8,7 +8,6 @@ public class GameDisplay extends JFrame {
     }
 
 
-
     public static void main(String[] args) {
         GameDisplay display = new GameDisplay("Space War");
         display.setResizable(false);
